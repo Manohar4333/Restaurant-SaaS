@@ -8,7 +8,8 @@ A production-ready, full-stack **MERN** SaaS platform built with strict tenant i
 
 1. Simply double-click **`start-dev.bat`** in the project root folder.
    - It automatically starts both the **Backend API (port 5000)** and **Frontend (port 5173)** concurrently.
-   - If local MongoDB is not running, it initializes an in-memory database automatically with sample seed data.
+   - If a replica-set-enabled local MongoDB is not available, it initializes an in-memory replica set automatically with sample seed data.
+   - Local MongoDB must be configured with replica set name `rs0` because tenant creation uses multi-document transactions. Set `MONGO_URI` to include `?replicaSet=rs0` (or `&replicaSet=rs0` when other query options are already present).
 
 ---
 
@@ -57,7 +58,7 @@ If Docker is installed:
 docker-compose up --build
 ```
 This boots up:
-- MongoDB Container on `mongodb://localhost:27017`
+- MongoDB replica set on `mongodb://localhost:27017` (required for multi-document transactions)
 - Express Backend on `http://localhost:5000`
 - React Frontend on `http://localhost:5173`
 

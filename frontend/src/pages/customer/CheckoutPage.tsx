@@ -22,13 +22,17 @@ export const CheckoutPage: React.FC = () => {
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!restaurantSlug) return;
+    if (!tableToken) {
+      setError('Scan this restaurant’s table QR code before placing an order.');
+      return;
+    }
     setError('');
     setIsLoading(true);
 
     try {
       const payload = {
         restaurantSlug,
-        tableToken: tableToken || 'mock_qr_token_default',
+        tableToken,
         customer: {
           name,
           phone,
@@ -69,6 +73,15 @@ export const CheckoutPage: React.FC = () => {
       {error && (
         <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl">
           {error}
+        </div>
+      )}
+      {!tableToken && (
+        <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl">
+          <p className="font-semibold">A table QR code is required to place an order.</p>
+          <p className="mt-1">
+            Scan the QR code for your table. For local testing, sign in to the restaurant admin panel, open
+            {' '}Tables &amp; QR Codes, choose View QR for a table, then select Open Customer Menu URL.
+          </p>
         </div>
       )}
 
@@ -154,6 +167,7 @@ export const CheckoutPage: React.FC = () => {
           variant="primary"
           className="w-full py-3 text-sm font-bold shadow-xl shadow-orange-950/20"
           isLoading={isLoading}
+          disabled={!tableToken}
         >
           Place Order (₹{total}) →
         </Button>

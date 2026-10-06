@@ -1,23 +1,27 @@
 import mongoose from 'mongoose';
 import { ENV } from './env';
 
-let memoryServer: any = null;
+let memoryServer: import('mongodb-memory-server').MongoMemoryReplSet | null = null;
 
 export async function connectDatabase(): Promise<typeof mongoose> {
   const uri = ENV.MONGO_URI;
 
   try {
-    // Attempt standard connection with 3s timeout
     await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 3000,
+      serverSelectionTimeoutMS: 10000,
     });
-    console.log(`[Database] Connected successfully to MongoDB at ${uri}`);
+    console.log('[Database] Connected successfully to configured MongoDB.');
     return mongoose;
   } catch (err) {
-    console.warn(`[Database] Direct connection to ${uri} failed or timed out. Initializing in-memory fallback MongoDB...`);
+    if (ENV.MONGO_URI_CONFIGURED || ENV.NODE_ENV === 'production') {
+      console.error('[Database] Could not connect to configured MongoDB. Check MONGO_URI, Atlas network access, and credentials.');
+      throw err;
+    }
+
+    console.warn('[Database] Local MongoDB is unavailable. Initializing an in-memory fallback; data will not persist.');
     try {
-      const { MongoMemoryServer } = await import('mongodb-memory-server');
-      memoryServer = await MongoMemoryServer.create();
+      const { MongoMemoryReplSet } = await import('mongodb-memory-server');
+      memoryServer = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
       const memUri = memoryServer.getUri();
       await mongoose.connect(memUri);
       console.log(`[Database] Connected successfully to In-Memory MongoDB at ${memUri}`);

@@ -54,11 +54,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [items, restaurantSlug, tableToken, tableNumber]);
 
   const setContext = (slug: string, token?: string, tableNum?: string) => {
-    if (slug !== restaurantSlug && items.length === 0) {
-      setRestaurantSlug(slug);
+    if (slug !== restaurantSlug && items.length > 0) {
+      return;
     }
-    if (token) setTableToken(token);
-    if (tableNum) setTableNumber(tableNum);
+
+    setRestaurantSlug(slug);
+    setTableToken(token || null);
+    setTableNumber(tableNum || null);
   };
 
   const addItem = (product: Product, quantity = 1, currentSlug?: string): boolean => {

@@ -3,6 +3,7 @@ import { api } from '../../api/client';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
+import { QRCodeSVG } from 'qrcode.react';
 import { Plus, QrCode, ExternalLink, Trash2 } from 'lucide-react';
 
 export const TableList: React.FC = () => {
@@ -152,12 +153,8 @@ export const TableList: React.FC = () => {
       <Modal isOpen={!!selectedQR} onClose={() => setSelectedQR(null)} title={`QR Code: ${selectedQR?.tableNumber}`}>
         <div className="text-center space-y-4">
           <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 inline-block">
-            {/* SVG Representation of QR */}
-            <div className="w-48 h-48 mx-auto bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center">
-              <QrCode className="w-36 h-36 text-slate-900" />
-              <p className="text-[10px] font-mono text-slate-500 mt-1 truncate max-w-[170px]">
-                {selectedQR?.qrToken}
-              </p>
+            <div className="mx-auto bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+              {selectedQR?.qrUrl && <QRCodeSVG value={selectedQR.qrUrl} size={192} level="M" />}
             </div>
           </div>
           <p className="text-xs text-slate-600">
