@@ -22,7 +22,34 @@ app.use(
 // CORS setup
 app.use(
   cors({
-    origin: [ENV.FRONTEND_URL, 'http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: (origin, callback) => {
+      // Allow requests without an Origin header
+      // (for example, server-to-server requests)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      const isLocalhost =
+        origin === 'http://localhost:5173' ||
+        origin === 'http://127.0.0.1:5173';
+
+      const isConfiguredFrontend =
+        origin === ENV.FRONTEND_URL;
+
+      // Allow your Restaurant SaaS Vercel frontend deployments
+      const isRestaurantSaaSFrontend =
+        /^https:\/\/restaurant-saa-s-frontend-[a-z0-9]+-manohars-projects-1b69d9f6\.vercel\.app$/.test(
+          origin
+        ) ||
+        origin === 'https://restaurant-saa-s-frontend-rho.vercel.app';
+
+      if (isLocalhost || isConfiguredFrontend || isRestaurantSaaSFrontend) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked origin: ${origin}`));
+    },
+
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
