@@ -1,4 +1,5 @@
 import express, { Application } from 'express';
+import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -8,6 +9,7 @@ import { ENV } from './config/env';
 import { swaggerSpec } from './config/swagger';
 import routes from './routes';
 import { errorHandler } from './middlewares/errorHandler';
+import { connectDatabase } from './config/database';
 
 const app: Application = express();
 
@@ -68,6 +70,27 @@ if (ENV.NODE_ENV !== 'test') {
 
 // Swagger API Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// Mount Versioned API Routes
+// app.use('/api/v1', routes);
+
+// Ensure MongoDB is connected before API requests
+app.use(async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      await connectDatabase();
+    }
+
+    next();
+  } catch (error) {
+    console.error('[Database] Connection failed:', error);
+
+    res.status(500).json({
+      status: 'error',
+      message: 'Database connection failed',
+    });
+  }
+});
 
 // Mount Versioned API Routes
 app.use('/api/v1', routes);
